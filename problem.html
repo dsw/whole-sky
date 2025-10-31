@@ -1,0 +1,861 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+<meta name="generator" content="AsciiDoc 10.1.2" />
+<title>Whole Sky Technologies / Dewdrop: Hardware Enforcement of Memory Safety and More at a Modest Cost</title>
+<style type="text/css">
+/* Shared CSS for AsciiDoc xhtml11 and html5 backends */
+
+/* Default font. */
+body {
+  font-family: Georgia,serif;
+}
+
+/* Title font. */
+h1, h2, h3, h4, h5, h6,
+div.title, caption.title,
+thead, p.table.header,
+#toctitle,
+#author, #revnumber, #revdate, #revremark,
+#footer {
+  font-family: Arial,Helvetica,sans-serif;
+}
+
+body {
+  margin: 1em 5% 1em 5%;
+}
+
+a {
+  color: blue;
+  text-decoration: underline;
+}
+a:visited {
+  color: fuchsia;
+}
+
+em {
+  font-style: italic;
+  color: navy;
+}
+
+strong {
+  font-weight: bold;
+  color: #083194;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #527bbd;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+h1, h2, h3 {
+  border-bottom: 2px solid silver;
+}
+h2 {
+  padding-top: 0.5em;
+}
+h3 {
+  float: left;
+}
+h3 + * {
+  clear: left;
+}
+h5 {
+  font-size: 1.0em;
+}
+
+div.sectionbody {
+  margin-left: 0;
+}
+
+hr {
+  border: 1px solid silver;
+}
+
+p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+ul, ol, li > p {
+  margin-top: 0;
+}
+ul > li     { color: #aaa; }
+ul > li > * { color: black; }
+
+.monospaced, code, pre {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
+  padding: 0;
+  margin: 0;
+}
+pre {
+  white-space: pre-wrap;
+}
+
+#author {
+  color: #527bbd;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+#email {
+}
+#revnumber, #revdate, #revremark {
+}
+
+#footer {
+  font-size: small;
+  border-top: 2px solid silver;
+  padding-top: 0.5em;
+  margin-top: 4.0em;
+}
+#footer-text {
+  float: left;
+  padding-bottom: 0.5em;
+}
+#footer-badges {
+  float: right;
+  padding-bottom: 0.5em;
+}
+
+#preamble {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+div.imageblock, div.exampleblock, div.verseblock,
+div.quoteblock, div.literalblock, div.listingblock, div.sidebarblock,
+div.admonitionblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.admonitionblock {
+  margin-top: 2.0em;
+  margin-bottom: 2.0em;
+  margin-right: 10%;
+  color: #606060;
+}
+
+div.content { /* Block element content. */
+  padding: 0;
+}
+
+/* Block element titles. */
+div.title, caption.title {
+  color: #527bbd;
+  font-weight: bold;
+  text-align: left;
+  margin-top: 1.0em;
+  margin-bottom: 0.5em;
+}
+div.title + * {
+  margin-top: 0;
+}
+
+td div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content + div.title {
+  margin-top: 0.0em;
+}
+
+div.sidebarblock > div.content {
+  background: #ffffee;
+  border: 1px solid #dddddd;
+  border-left: 4px solid #f0f0f0;
+  padding: 0.5em;
+}
+
+div.listingblock > div.content {
+  border: 1px solid #dddddd;
+  border-left: 5px solid #f0f0f0;
+  background: #f8f8f8;
+  padding: 0.5em;
+}
+
+div.quoteblock, div.verseblock {
+  padding-left: 1.0em;
+  margin-left: 1.0em;
+  margin-right: 10%;
+  border-left: 5px solid #f0f0f0;
+  color: #888;
+}
+
+div.quoteblock > div.attribution {
+  padding-top: 0.5em;
+  text-align: right;
+}
+
+div.verseblock > pre.content {
+  font-family: inherit;
+  font-size: inherit;
+}
+div.verseblock > div.attribution {
+  padding-top: 0.75em;
+  text-align: left;
+}
+/* DEPRECATED: Pre version 8.2.7 verse style literal block. */
+div.verseblock + div.attribution {
+  text-align: left;
+}
+
+div.admonitionblock .icon {
+  vertical-align: top;
+  font-size: 1.1em;
+  font-weight: bold;
+  text-decoration: underline;
+  color: #527bbd;
+  padding-right: 0.5em;
+}
+div.admonitionblock td.content {
+  padding-left: 0.5em;
+  border-left: 3px solid #dddddd;
+}
+
+div.exampleblock > div.content {
+  border-left: 3px solid #dddddd;
+  padding-left: 0.5em;
+}
+
+div.imageblock div.content { padding-left: 0; }
+span.image img { border-style: none; vertical-align: text-bottom; }
+a.image:visited { color: white; }
+
+dl {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+dt {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+  font-style: normal;
+  color: navy;
+}
+dd > *:first-child {
+  margin-top: 0.1em;
+}
+
+ul, ol {
+    list-style-position: outside;
+}
+ol.arabic {
+  list-style-type: decimal;
+}
+ol.loweralpha {
+  list-style-type: lower-alpha;
+}
+ol.upperalpha {
+  list-style-type: upper-alpha;
+}
+ol.lowerroman {
+  list-style-type: lower-roman;
+}
+ol.upperroman {
+  list-style-type: upper-roman;
+}
+
+div.compact ul, div.compact ol,
+div.compact p, div.compact p,
+div.compact div, div.compact div {
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+}
+
+tfoot {
+  font-weight: bold;
+}
+td > div.verse {
+  white-space: pre;
+}
+
+div.hdlist {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+div.hdlist tr {
+  padding-bottom: 15px;
+}
+dt.hdlist1.strong, td.hdlist1.strong {
+  font-weight: bold;
+}
+td.hdlist1 {
+  vertical-align: top;
+  font-style: normal;
+  padding-right: 0.8em;
+  color: navy;
+}
+td.hdlist2 {
+  vertical-align: top;
+}
+div.hdlist.compact tr {
+  margin: 0;
+  padding-bottom: 0;
+}
+
+.comment {
+  background: yellow;
+}
+
+.footnote, .footnoteref {
+  font-size: 0.8em;
+}
+
+span.footnote, span.footnoteref {
+  vertical-align: super;
+}
+
+#footnotes {
+  margin: 20px 0 20px 0;
+  padding: 7px 0 0 0;
+}
+
+#footnotes div.footnote {
+  margin: 0 0 5px 0;
+}
+
+#footnotes hr {
+  border: none;
+  border-top: 1px solid silver;
+  height: 1px;
+  text-align: left;
+  margin-left: 0;
+  width: 20%;
+  min-width: 100px;
+}
+
+div.colist td {
+  padding-right: 0.5em;
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+div.colist td img {
+  margin-top: 0.3em;
+}
+
+@media print {
+  #footer-badges { display: none; }
+}
+
+#toc {
+  margin-bottom: 2.5em;
+}
+
+#toctitle {
+  color: #527bbd;
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-top: 1.0em;
+  margin-bottom: 0.1em;
+}
+
+div.toclevel0, div.toclevel1, div.toclevel2, div.toclevel3, div.toclevel4 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+div.toclevel2 {
+  margin-left: 2em;
+  font-size: 0.9em;
+}
+div.toclevel3 {
+  margin-left: 4em;
+  font-size: 0.9em;
+}
+div.toclevel4 {
+  margin-left: 6em;
+  font-size: 0.9em;
+}
+
+span.aqua { color: aqua; }
+span.black { color: black; }
+span.blue { color: blue; }
+span.fuchsia { color: fuchsia; }
+span.gray { color: gray; }
+span.green { color: green; }
+span.lime { color: lime; }
+span.maroon { color: maroon; }
+span.navy { color: navy; }
+span.olive { color: olive; }
+span.purple { color: purple; }
+span.red { color: red; }
+span.silver { color: silver; }
+span.teal { color: teal; }
+span.white { color: white; }
+span.yellow { color: yellow; }
+
+span.aqua-background { background: aqua; }
+span.black-background { background: black; }
+span.blue-background { background: blue; }
+span.fuchsia-background { background: fuchsia; }
+span.gray-background { background: gray; }
+span.green-background { background: green; }
+span.lime-background { background: lime; }
+span.maroon-background { background: maroon; }
+span.navy-background { background: navy; }
+span.olive-background { background: olive; }
+span.purple-background { background: purple; }
+span.red-background { background: red; }
+span.silver-background { background: silver; }
+span.teal-background { background: teal; }
+span.white-background { background: white; }
+span.yellow-background { background: yellow; }
+
+span.big { font-size: 2em; }
+span.small { font-size: 0.6em; }
+
+span.underline { text-decoration: underline; }
+span.overline { text-decoration: overline; }
+span.line-through { text-decoration: line-through; }
+
+div.unbreakable { page-break-inside: avoid; }
+
+
+/*
+ * xhtml11 specific
+ *
+ * */
+
+div.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.tableblock > table {
+  border: 3px solid #527bbd;
+}
+thead, p.table.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.table {
+  margin-top: 0;
+}
+/* Because the table frame attribute is overridden by CSS in most browsers. */
+div.tableblock > table[frame="void"] {
+  border-style: none;
+}
+div.tableblock > table[frame="hsides"] {
+  border-left-style: none;
+  border-right-style: none;
+}
+div.tableblock > table[frame="vsides"] {
+  border-top-style: none;
+  border-bottom-style: none;
+}
+
+
+/*
+ * html5 specific
+ *
+ * */
+
+table.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+thead, p.tableblock.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.tableblock {
+  margin-top: 0;
+}
+table.tableblock {
+  border-width: 3px;
+  border-spacing: 0px;
+  border-style: solid;
+  border-color: #527bbd;
+  border-collapse: collapse;
+}
+th.tableblock, td.tableblock {
+  border-width: 1px;
+  padding: 4px;
+  border-style: solid;
+  border-color: #527bbd;
+}
+
+table.tableblock.frame-topbot {
+  border-left-style: hidden;
+  border-right-style: hidden;
+}
+table.tableblock.frame-sides {
+  border-top-style: hidden;
+  border-bottom-style: hidden;
+}
+table.tableblock.frame-none {
+  border-style: hidden;
+}
+
+th.tableblock.halign-left, td.tableblock.halign-left {
+  text-align: left;
+}
+th.tableblock.halign-center, td.tableblock.halign-center {
+  text-align: center;
+}
+th.tableblock.halign-right, td.tableblock.halign-right {
+  text-align: right;
+}
+
+th.tableblock.valign-top, td.tableblock.valign-top {
+  vertical-align: top;
+}
+th.tableblock.valign-middle, td.tableblock.valign-middle {
+  vertical-align: middle;
+}
+th.tableblock.valign-bottom, td.tableblock.valign-bottom {
+  vertical-align: bottom;
+}
+
+
+/*
+ * manpage specific
+ *
+ * */
+
+body.manpage h1 {
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  border-top: 2px solid silver;
+  border-bottom: 2px solid silver;
+}
+body.manpage h2 {
+  border-style: none;
+}
+body.manpage div.sectionbody {
+  margin-left: 3em;
+}
+
+@media print {
+  body.manpage div#toc { display: none; }
+}
+
+
+body {width:100%;max-width:40em;}</style>
+<script type="text/javascript">
+/*<![CDATA[*/
+var asciidoc = {  // Namespace.
+
+/////////////////////////////////////////////////////////////////////
+// Table Of Contents generator
+/////////////////////////////////////////////////////////////////////
+
+/* Author: Mihai Bazon, September 2002
+ * http://students.infoiasi.ro/~mishoo
+ *
+ * Table Of Content generator
+ * Version: 0.4
+ *
+ * Feel free to use this script under the terms of the GNU General Public
+ * License, as long as you do not remove or alter this notice.
+ */
+
+ /* modified by Troy D. Hanson, September 2006. License: GPL */
+ /* modified by Stuart Rackham, 2006, 2009. License: GPL */
+
+// toclevels = 1..4.
+toc: function (toclevels) {
+
+  function getText(el) {
+    var text = "";
+    for (var i = el.firstChild; i != null; i = i.nextSibling) {
+      if (i.nodeType == 3 /* Node.TEXT_NODE */) // IE doesn't speak constants.
+        text += i.data;
+      else if (i.firstChild != null)
+        text += getText(i);
+    }
+    return text;
+  }
+
+  function TocEntry(el, text, toclevel) {
+    this.element = el;
+    this.text = text;
+    this.toclevel = toclevel;
+  }
+
+  function tocEntries(el, toclevels) {
+    var result = new Array;
+    var re = new RegExp('[hH]([1-'+(toclevels+1)+'])');
+    // Function that scans the DOM tree for header elements (the DOM2
+    // nodeIterator API would be a better technique but not supported by all
+    // browsers).
+    var iterate = function (el) {
+      for (var i = el.firstChild; i != null; i = i.nextSibling) {
+        if (i.nodeType == 1 /* Node.ELEMENT_NODE */) {
+          var mo = re.exec(i.tagName);
+          if (mo && (i.getAttribute("class") || i.getAttribute("className")) != "float") {
+            result[result.length] = new TocEntry(i, getText(i), mo[1]-1);
+          }
+          iterate(i);
+        }
+      }
+    }
+    iterate(el);
+    return result;
+  }
+
+  var toc = document.getElementById("toc");
+  if (!toc) {
+    return;
+  }
+
+  // Delete existing TOC entries in case we're reloading the TOC.
+  var tocEntriesToRemove = [];
+  var i;
+  for (i = 0; i < toc.childNodes.length; i++) {
+    var entry = toc.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div'
+     && entry.getAttribute("class")
+     && entry.getAttribute("class").match(/^toclevel/))
+      tocEntriesToRemove.push(entry);
+  }
+  for (i = 0; i < tocEntriesToRemove.length; i++) {
+    toc.removeChild(tocEntriesToRemove[i]);
+  }
+
+  // Rebuild TOC entries.
+  var entries = tocEntries(document.getElementById("content"), toclevels);
+  for (var i = 0; i < entries.length; ++i) {
+    var entry = entries[i];
+    if (entry.element.id == "")
+      entry.element.id = "_toc_" + i;
+    var a = document.createElement("a");
+    a.href = "#" + entry.element.id;
+    a.appendChild(document.createTextNode(entry.text));
+    var div = document.createElement("div");
+    div.appendChild(a);
+    div.className = "toclevel" + entry.toclevel;
+    toc.appendChild(div);
+  }
+  if (entries.length == 0)
+    toc.parentNode.removeChild(toc);
+},
+
+
+/////////////////////////////////////////////////////////////////////
+// Footnotes generator
+/////////////////////////////////////////////////////////////////////
+
+/* Based on footnote generation code from:
+ * http://www.brandspankingnew.net/archive/2005/07/format_footnote.html
+ */
+
+footnotes: function () {
+  // Delete existing footnote entries in case we're reloading the footnodes.
+  var i;
+  var noteholder = document.getElementById("footnotes");
+  if (!noteholder) {
+    return;
+  }
+  var entriesToRemove = [];
+  for (i = 0; i < noteholder.childNodes.length; i++) {
+    var entry = noteholder.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div' && entry.getAttribute("class") == "footnote")
+      entriesToRemove.push(entry);
+  }
+  for (i = 0; i < entriesToRemove.length; i++) {
+    noteholder.removeChild(entriesToRemove[i]);
+  }
+
+  // Rebuild footnote entries.
+  var cont = document.getElementById("content");
+  var spans = cont.getElementsByTagName("span");
+  var refs = {};
+  var n = 0;
+  for (i=0; i<spans.length; i++) {
+    if (spans[i].className == "footnote") {
+      n++;
+      var note = spans[i].getAttribute("data-note");
+      if (!note) {
+        // Use [\s\S] in place of . so multi-line matches work.
+        // Because JavaScript has no s (dotall) regex flag.
+        note = spans[i].innerHTML.match(/\s*\[([\s\S]*)]\s*/)[1];
+        spans[i].innerHTML =
+          "[<a id='_footnoteref_" + n + "' href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+        spans[i].setAttribute("data-note", note);
+      }
+      noteholder.innerHTML +=
+        "<div class='footnote' id='_footnote_" + n + "'>" +
+        "<a href='#_footnoteref_" + n + "' title='Return to text'>" +
+        n + "</a>. " + note + "</div>";
+      var id =spans[i].getAttribute("id");
+      if (id != null) refs["#"+id] = n;
+    }
+  }
+  if (n == 0)
+    noteholder.parentNode.removeChild(noteholder);
+  else {
+    // Process footnoterefs.
+    for (i=0; i<spans.length; i++) {
+      if (spans[i].className == "footnoteref") {
+        var href = spans[i].getElementsByTagName("a")[0].getAttribute("href");
+        href = href.match(/#.*/)[0];  // Because IE return full URL.
+        n = refs[href];
+        spans[i].innerHTML =
+          "[<a href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+      }
+    }
+  }
+},
+
+install: function(toclevels) {
+  var timerId;
+
+  function reinstall() {
+    asciidoc.footnotes();
+    if (toclevels) {
+      asciidoc.toc(toclevels);
+    }
+  }
+
+  function reinstallAndRemoveTimer() {
+    clearInterval(timerId);
+    reinstall();
+  }
+
+  timerId = setInterval(reinstall, 500);
+  if (document.addEventListener)
+    document.addEventListener("DOMContentLoaded", reinstallAndRemoveTimer, false);
+  else
+    window.onload = reinstallAndRemoveTimer;
+}
+
+}
+asciidoc.install();
+/*]]>*/
+</script>
+</head>
+<body class="article">
+<div id="header">
+<h1>Whole Sky Technologies / Dewdrop: Hardware Enforcement of Memory Safety and More at a Modest Cost</h1>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<a style="margin:0.2em" href=index.html>home</a> |
+<a style="margin:0.2em" href=problem.html>problem</a> |
+<a style="margin:0.2em" href=opportunity.html>opportunity</a> |
+<a style="margin:0.2em" href=solution.html>solution</a> |
+<br>
+<a style="margin:0.2em" href=market.html>market</a> |
+<a style="margin:0.2em" href=past-systems.html>past-systems</a> |
+<a style="margin:0.2em" href=competition.html>competition</a> |
+<a style="margin:0.2em" href=team.html>team</a> |
+<a style="margin:0.2em" href=intellectual-property.html>intellectual-property</a> |
+<a style="margin:0.2em" href=contact.html>contact</a>
+<br><br><br>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_problem_click_here_to_kill_everybody">Problem: “Click Here to Kill Everybody”</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Cybersecurity failure is becoming a civilization-ending threat.</p></div>
+<div class="paragraph"><p><a href="https://www.wired.com/story/notpetya-cyberattack-ukraine-russia-code-crashed-the-world/">https://www.wired.com/story/notpetya-cyberattack-ukraine-russia-code-crashed-the-world/</a>  “The Untold Story of NotPetya, the Most Devastating Cyberattack in History[:] NotPetya cost Maersk between $250 million and $300 million.”</p></div>
+<div class="paragraph"><p><a href="https://www.youtube.com/watch?v=soV7-gwxarE">https://www.youtube.com/watch?v=soV7-gwxarE</a>  Vint Cerf (one of “the fathers of the Internet”): ‘The headline I worry about is the one that says “A Hundred Thousand Refrigerators Attack Bank of America.”’</p></div>
+<div class="paragraph"><p><a href="http://www.cbsnews.com/news/60-minutes-great-brain-robbery-china-cyber-espionage/">http://www.cbsnews.com/news/60-minutes-great-brain-robbery-china-cyber-espionage/</a>  “The Justice Department says that the scale of China’s corporate espionage is so vast it constitutes a national security emergency….”</p></div>
+<div class="paragraph"><p><a href="http://foreignpolicy.com/2015/11/20/u-s-fears-hackers-will-manipulate-data-not-just-steal-it/">http://foreignpolicy.com/2015/11/20/u-s-fears-hackers-will-manipulate-data-not-just-steal-it/</a>  Adm. Michael Rogers, director of the National Security Agency: “What happens if the digital underpinning that we’ve all come to rely on is no longer believable?”</p></div>
+<div class="paragraph"><p><a href="https://www.schneier.com/books/click_here/">https://www.schneier.com/books/click_here/</a>  Last year Bruce Schneier, one of the worlds experts on “security, computer and otherwise”, wrote a book called “Click Here to Kill Everybody.”</p></div>
+<div class="sect2">
+<h3 id="_tesco_bank_thousands_of_customers_have_seen_hundreds_of_pounds_wiped_from_their_savings_accounts">Tesco Bank: “…thousands of customers have seen hundreds of pounds wiped from their savings accounts”</h3>
+<div class="paragraph"><p>It was the realization in 2005-2006 that this could happen at any time that lead us to working on this problem: <a href="http://www.independent.co.uk/news/business/news/tesco-bank-accounts-suspended-transactions-access-frozen-hack-money-la-a7402006.html">http://www.independent.co.uk/news/business/news/tesco-bank-accounts-suspended-transactions-access-frozen-hack-money-la-a7402006.html</a></p></div>
+<div class="quoteblock">
+<div class="content">
+<div class="paragraph"><p>Tesco Bank has taken the drastic measure of temporarily halting all online transactions after thousands of customers have seen hundreds of pounds wiped from their savings accounts over the weekend due to an online hacking attack.</p></div>
+</div>
+<div class="attribution">
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_end_to_end_encryption_isn_t_as_safe_as_you_think">“End-to-End Encryption Isn’t as Safe as You Think”</h3>
+<div class="paragraph"><p>Encryption is not going to save us: <a href="https://www.bloomberg.com/opinion/articles/2019-05-14/whatsapp-hack-shows-end-to-end-encryption-is-pointless">https://www.bloomberg.com/opinion/articles/2019-05-14/whatsapp-hack-shows-end-to-end-encryption-is-pointless</a></p></div>
+<div class="quoteblock">
+<div class="content">
+<div class="paragraph"><p>End-to-End Encryption Isn’t as Safe as You Think:  The WhatsApp hack shows how supposedly secure messaging apps have a basic vulnerability.  The discovery that hackers could snoop on WhatsApp should alert users of supposedly secure messaging apps to an uncomfortable truth:  “End-to-end encryption” sounds nice — but if anyone can get into your phone’s operating system, they will be able to read your messages without having to decrypt them.</p></div>
+</div>
+<div class="attribution">
+</div></div>
+<div class="paragraph"><p>This quote is a special case of a point we make elsewhere:  Software is built in layers.  When the abstractions at one layer fail, all the abstractions layers above it also fail.  Therefore, the most important layers to ensure are the ones at the bottom.  Our goal is not to just make things better, our goal is to raise the abstraction floor below which the program cannot fall.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_gao_nearly_all_major_programs_had_mission_critical_cyber_vulnerabilities_that_adversaries_could_compromise">GAO: “Nearly all major… programs… had mission-critical cyber vulnerabilities that adversaries could compromise.”</h3>
+<div class="paragraph"><p>Why send machines across an ocean to attack us when the Chinese can just tell our machines to do the same?  Or maybe, just turn them off.  <a href="https://www.gao.gov/assets/700/694913.pdf">https://www.gao.gov/assets/700/694913.pdf</a></p></div>
+<div class="quoteblock">
+<div class="content">
+<div class="paragraph"><p>United States Government Accountability Office, Report to the Committee on Armed Services, U.S. Senate, GAO-19-128, October 2018</p></div>
+<div class="paragraph"><p>WEAPON SYSTEMS CYBERSECURITY[:]  DOD weapon systems are more software dependent and more networked than ever before….  Nearly all major acquisition programs that were operationally tested between 2012 and 2017 had mission-critical cyber vulnerabilities that adversaries could compromise.</p></div>
+</div>
+<div class="attribution">
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_neurosurgeons_neural_implants_are_vulnerable_to_networked_attacks">“Neurosurgeons: … neural implants are vulnerable to networked attacks”</h3>
+<div class="paragraph"><p>What comes after computers that fit in your pocket?:  <a href="http://boingboing.net/2016/05/14/brainjacking-the-future-of-so.html">http://boingboing.net/2016/05/14/brainjacking-the-future-of-so.html</a></p></div>
+<div class="quoteblock">
+<div class="content">
+<div class="paragraph"><p>In a new scientific review paper published in World Neurosurgery, a group of Oxford neurosurgeons and scientists round up a set of dire, terrifying warnings about the way that neural implants are vulnerable to networked attacks.</p></div>
+<div class="paragraph"><p>Most of the article turns on deep brain stimulation devices, which can be used to stimulate or suppress activity in different parts of the brain, already used to treat some forms of mental illness, chronic pain and other disorders. The researchers round up a whole dystopia’s worth of potential attacks on these implants, including tampering with the victim’s reward system “to exert substantial control over a patient’s behaviour”; pain attacks that induce “severe pain in these patients”; and attacks on impulse control that could induce “Mania, hypersexuality, and pathological gambling.”…</p></div>
+<div class="paragraph"><p>The paper has a delightful bibliography, which cites books like Neuromancer, anime like Ghost in the Shell, as well as papers in Nature, Brain, The Journal of Neurosurgery, and Brain Stimulation.</p></div>
+</div>
+<div class="attribution">
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_schneier_everything_is_becoming_a_computer">Schneier: “Everything is becoming a computer”</h3>
+<div class="paragraph"><p>Bruce Schneier, one of the worlds experts on “security, computer and otherwise”: <a href="https://www.schneier.com/crypto-gram/archives/2017/0615.html">https://www.schneier.com/crypto-gram/archives/2017/0615.html</a></p></div>
+<div class="quoteblock">
+<div class="content">
+<div class="paragraph"><p>Everything is becoming a computer. Your microwave is a computer that makes things hot. Your refrigerator is a computer that keeps things cold. Your car and television, the traffic lights and signals in your city and our national power grid are all computers. This is the much-hyped Internet of Things (IoT). It’s coming, and it’s coming faster than you might think. And as these devices connect to the Internet, they become vulnerable to ransomware and other computer threats.</p></div>
+<div class="paragraph"><p>It’s only a matter of time before people get messages on their car screens saying that the engine has been disabled and it will cost $200 in bitcoin to turn it back on. Or a similar message on their phones about their Internet-enabled door lock: Pay $100 if you want to get into your house tonight. Or pay far more if they want their embedded heart defibrillator to keep working.…</p></div>
+<div class="paragraph"><p>Patching is how the computer industry maintains security in the face of rampant Internet insecurity. Microsoft, Apple and Google have teams of engineers who quickly write, test and distribute these patches, updates to the codes that fix vulnerabilities in software. Most people have set up their computers and phones to automatically apply these patches, and the whole thing works seamlessly. It isn’t a perfect system, but it’s the best we have.</p></div>
+<div class="paragraph"><p>But it is a system that’s going to fail in the “Internet of things”: everyday devices like smart speakers, household appliances, toys, lighting systems, even cars, that are connected to the web. Many of the embedded networked systems in these devices that will pervade our lives don’t have engineering teams on hand to write patches and may well last far longer than the companies that are supposed to keep the software safe from criminals. Some of them don’t even have the ability to be patched.</p></div>
+<div class="paragraph"><p>Fast forward five to 10 years, and the world is going to be filled with literally tens of billions of devices that hackers can attack. We’re going to see ransomware against our cars. Our digital video recorders and web cameras will be taken over by botnets. The data that these devices collect about us will be stolen and used to commit fraud. And we’re not going to be able to secure these devices.</p></div>
+</div>
+<div class="attribution">
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_the_case_for_memory_safe_roadmaps">"The Case for Memory Safe Roadmaps"</h3>
+<div class="paragraph"><p><a href="https://media.defense.gov/2023/Dec/06/2003352724/-1/-1/0/THE-CASE-FOR-MEMORY-SAFE-ROADMAPS-TLP-CLEAR.PDF">https://media.defense.gov/2023/Dec/06/2003352724/-1/-1/0/THE-CASE-FOR-MEMORY-SAFE-ROADMAPS-TLP-CLEAR.PDF</a>
+"The Case for Memory Safe Roadmaps[:] Why Both C-Suite Executives and
+Technical Experts Need to Take Memory Safe Coding Seriously (December
+2023)"</p></div>
+<div class="paragraph"><p>United States Cybersecurity and Infrastructure Security Agency, United
+States National Security Agency, United States Federal Bureau of
+Investigation, Australian Signals Directorate’s Australian Cyber
+Security Centre, Canadian Centre for Cyber Security, United Kingdom
+National Cyber Security Centre, New Zealand National Cyber Security
+Centre, Computer Emergency Response Team New Zealand</p></div>
+<div class="quoteblock">
+<div class="content">
+<div class="paragraph"><p>Memory safety vulnerabilities are the most prevalent type of disclosed
+software vulnerability.  They are a class of well-known and common
+coding errors that malicious actors routinely exploit. These
+vulnerabilities represent a major problem for the software
+industry…. These vulnerabilities persist despite software
+manufacturers historically expending significant resources attempting
+to reduce their prevalence and impact through various methods,
+including analyzing, patching, publishing new code and investing in
+training programs for developers. …</p></div>
+</div>
+<div class="attribution">
+</div></div>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes"><hr /></div>
+<div id="footer">
+<div id="footer-text">
+
+
+</div>
+</div>
+</body>
+</html>
