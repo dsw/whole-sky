@@ -758,12 +758,83 @@ asciidoc.install();
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_implementation">Implementation</h3>
-<div class="paragraph"><p>We have a working C++ software simulation of the Dewdrop hardware and
-of our RISC-V-64 machine.</p></div>
-<div class="paragraph"><p>We have a working FIRRTL/Verilog implementation of our RISC-V-64
-machine.</p></div>
-<div class="paragraph"><p>We have source-to-source transforms that augment the gcc compiler
-toolchain and we have a modified version of the musl libc library.</p></div>
+<div class="paragraph"><p>We have multiple Dewdrop-RISCV64 simulators/implementations:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+nrm: our own software simulator;
+</p>
+</li>
+<li>
+<p>
+dewdrop-spike: Dewdrop integrated into the official Berkeley spike
+   "RISCV golden model" simulator;
+</p>
+</li>
+<li>
+<p>
+a representation which compiles to FIRRTL, which compiles to
+   SystemVerilog using the CIRCT FIRRTL toolchain, which compiles to
+   C++ using Verilator;
+</p>
+</li>
+<li>
+<p>
+the same SystemVerilog which compiles to a bitstream for the Amazon
+   AWS F2 FPGA using Vivado; this single-cycle CPU runs at 15.625 MHz
+   on the F2; we expect the performance to improve.
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>We provide a user augmented RISCV compiler toolchain which targets
+Dewdrop-RISCV64:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+we use the gcc-riscv compiler unmodified,
+</p>
+</li>
+<li>
+<p>
+however we interleave the build process with some additional
+   stages.
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>We provide runtime support libraries: we link against</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+our own dewdrop-runtime library, and
+</p>
+</li>
+<li>
+<p>
+a modified dewdrop-musl libc.
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Relevance of open source licenses of code that we modify:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Note that all of the open source projects we maintain as a
+   modification (clang/LLVM, spike, pk, musl) are BSD-style Open
+   Source,
+</p>
+</li>
+<li>
+<p>
+though there might be some question as to the legal status of
+   something we maintain as a patch to the default gcc-riscv linker
+   script since gcc is now released under GPLv3: it is not clear to me
+   whether a patch to a linker script which can be applied at each run
+   counts as a modification of gcc; note that this patch only augments
+   the linker script, in order to also merge our meta-data, when doing
+   the merge phase of linking.
+</p>
+</li>
+</ul></div>
 </div>
 <div class="sect2">
 <h3 id="_patents">Patents</h3>
